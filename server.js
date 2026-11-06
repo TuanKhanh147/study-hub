@@ -117,30 +117,84 @@ const upload = multer({
   limits: { fileSize: 100 * 1024 * 1024 } // 100MB per file
 });
 
+// Helper: Clean text and remove binary/corrupt replacement glyphs
+function sanitizeText(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  return raw
+    .replace(/\uFFFD/g, ' ')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, ' ')
+    .replace(/[\x00-\x1F\x7F-\x9F]/g, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// Check if a line is meaningful human-readable Vietnamese/English text
+function isLegitimateTextLine(line) {
+  if (!line || typeof line !== 'string') return false;
+  const trimmed = line.trim();
+  if (trimmed.length < 15) return false;
+
+  const validChars = trimmed.match(/[a-zA-Z0-9àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđÀÁẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÈÉẺẼẸÊẾỀỂỄỆÌÍỈĨỊÒÓỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÙÚỦŨỤƯỨỪỬỮỰỲÝỶỸỴĐ\s,\.:;!?\-"'\(\)\/%\+=\*<>&]/g);
+  const validCount = validChars ? validChars.length : 0;
+  const ratio = validCount / trimmed.length;
+
+  return ratio >= 0.75;
+}
+
 // Helper: Extract text from file (PDF, DOCX, TXT, MD, etc.)
 async function extractTextFromFile(filePath, originalname) {
   const ext = path.extname(originalname).toLowerCase();
   if (ext === '.txt' || ext === '.md' || ext === '.json' || ext === '.csv') {
-    return fs.readFileSync(filePath, 'utf-8');
+    try {
+      return sanitizeText(fs.readFileSync(filePath, 'utf-8'));
+    } catch (e) {
+      return '';
+    }
   }
 
   if (ext === '.pdf') {
     try {
-      const pdfParse = require('pdf-parse');
       const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
-      return data.text || '';
+      const pdfLib = require('pdf-parse');
+
+      // 1. pdf-parse v2 (Class-based: new pdfLib.PDFParse({ data }))
+      if (pdfLib && pdfLib.PDFParse) {
+        const parser = new pdfLib.PDFParse({ data: dataBuffer });
+        const res = await parser.getText();
+        const extracted = (res && typeof res.text === 'string') ? res.text : (typeof res === 'string' ? res : '');
+        if (extracted && extracted.trim().length > 0) {
+          return sanitizeText(extracted);
+        }
+      }
+
+      // 2. pdf-parse v1 (Function-based: pdfLib(dataBuffer))
+      if (typeof pdfLib === 'function') {
+        const data = await pdfLib(dataBuffer);
+        if (data && data.text) {
+          return sanitizeText(data.text);
+        }
+      }
+
+      if (pdfLib && typeof pdfLib.default === 'function') {
+        const data = await pdfLib.default(dataBuffer);
+        if (data && data.text) {
+          return sanitizeText(data.text);
+        }
+      }
     } catch (e) {
-      console.warn('PDF parse fallback or error:', e.message);
-      return fs.readFileSync(filePath, 'utf-8').replace(/[\x00-\x09\x0B-\x1F\x7F-\x9F]/g, ' ');
+      console.error('PDF parsing error:', e.message);
     }
+
+    // Never read raw binary compressed PDF stream as text!
+    return 'Tài liệu PDF này không thể trích xuất văn bản tự động (có thể là file quét hình ảnh scan hoặc file bị bảo mật). Vui lòng dán văn bản trực tiếp hoặc tải file Word / Text.';
   }
 
   if (ext === '.docx') {
     try {
       const mammoth = require('mammoth');
       const result = await mammoth.extractRawText({ path: filePath });
-      return result.value || '';
+      return sanitizeText(result.value || '');
     } catch (e) {
       console.warn('DOCX parse fallback or error:', e.message);
       return '';
@@ -148,7 +202,7 @@ async function extractTextFromFile(filePath, originalname) {
   }
 
   try {
-    return fs.readFileSync(filePath, 'utf-8');
+    return sanitizeText(fs.readFileSync(filePath, 'utf-8'));
   } catch (e) {
     return '';
   }
@@ -157,10 +211,14 @@ async function extractTextFromFile(filePath, originalname) {
 // Smart NLP Heuristic for Concept & Focus Extraction (Runs 100% offline!)
 function offlineAnalyzeDocument(text, filename) {
   if (typeof text !== 'string') text = String(text || '');
-  const lines = text.split(/\r?\n/).map(l => String(l || '').trim()).filter(l => l.length > 0);
+  let rawLines = text.split(/\r?\n/).map(l => String(l || '').trim()).filter(l => l.length > 0);
   
+  // Filter only legitimate readable lines
+  let lines = rawLines.filter(isLegitimateTextLine);
+  if (lines.length === 0) lines = rawLines.filter(l => l.length > 10);
+
   // 1. Overview summary
-  let overview = `Tài liệu "${filename}" bao gồm khoảng ${lines.length} đoạn văn bản (${text.length} ký tự). Tài liệu cung cấp hệ thống kiến thức lý thuyết, bài tập và ví dụ minh họa phục vụ quá trình học tập và ôn thi chuyên sâu.`;
+  let overview = `Tài liệu "${filename}" bao gồm khoảng ${lines.length} đoạn nội dung. Tài liệu cung cấp hệ thống kiến thức lý thuyết, bài tập và ví dụ minh họa phục vụ quá trình học tập và ôn thi chuyên sâu.`;
   const firstMeaningfulParagraphs = lines.slice(0, 5).filter(l => l.length > 30).slice(0, 2);
   if (firstMeaningfulParagraphs.length > 0) {
     overview += ' ' + firstMeaningfulParagraphs.join(' ');
@@ -168,11 +226,11 @@ function offlineAnalyzeDocument(text, filename) {
 
   // 2. Identify Core Concepts & Definitions
   const concepts = [];
-  const conceptKeywords = ['là', 'được định nghĩa', 'khái niệm', 'nguyên lý', 'đặc điểm', 'ý nghĩa', 'vai trò', 'quy tắc'];
+  const conceptKeywords = ['là', 'được định nghĩa', 'khái niệm', 'nguyên lý', 'đặc điểm', 'ý nghĩa', 'vai trò', 'quy tắc', 'mục tiêu', 'chức năng'];
   
   for (const line of lines) {
     if (concepts.length >= 8) break;
-    if (line.length > 25 && line.length < 300) {
+    if (line.length > 20 && line.length < 300) {
       const lower = line.toLowerCase();
       const hasKeyword = conceptKeywords.some(k => lower.includes(k));
       const hasHeading = /^(chương|\d+\.|\*|-|bài|phần|[a-z]\))/i.test(line);
@@ -189,20 +247,24 @@ function offlineAnalyzeDocument(text, filename) {
           term = parts[0].trim();
           desc = 'Là ' + parts.slice(1).join(' là ').trim();
         }
-        concepts.push({
-          term: String(term).substring(0, 60),
-          description: String(desc).substring(0, 250),
-          importance: concepts.length < 3 ? 'Cao' : 'Trung bình'
-        });
+        term = sanitizeText(term).replace(/^[\*\-\d\.\)]+\s*/, '').substring(0, 60);
+        desc = sanitizeText(desc).substring(0, 250);
+        if (term.length >= 3 && desc.length >= 10) {
+          concepts.push({
+            term,
+            description: desc,
+            importance: concepts.length < 3 ? 'Cao' : 'Trung bình'
+          });
+        }
       }
     }
   }
 
   // Fallback concepts if document was short
   if (concepts.length === 0) {
-    const fallbackDesc = (lines[0] && lines[0].length < 250) ? lines[0] : 'Kiến thức cốt lõi của bài học';
+    const fallbackDesc = (lines[0] && lines[0].length < 250) ? sanitizeText(lines[0]) : 'Tài liệu cung cấp kiến thức nền tảng và các nội dung ôn tập trọng tâm.';
     concepts.push({
-      term: 'Nội dung trọng tâm',
+      term: 'Nội dung cốt lõi của bài học',
       description: fallbackDesc,
       importance: 'Cao'
     });
