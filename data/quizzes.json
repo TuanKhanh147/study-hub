@@ -1,0 +1,132 @@
+[
+  {
+    "id": "quiz_1793963569333",
+    "userId": "user_demo",
+    "title": "Đề thi Kiến trúc máy tính",
+    "totalQuestions": 5,
+    "durationMinutes": 10,
+    "questions": [
+      {
+        "id": "q_1",
+        "question": "Câu 1: Thành phần nào trong CPU chịu trách nhiệm thực hiện các phép tính số học và logic?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Control Unit (CU)"
+          },
+          {
+            "key": "B",
+            "text": "Arithmetic and Logic Unit (ALU)"
+          },
+          {
+            "key": "C",
+            "text": "Thanh ghi Register"
+          },
+          {
+            "key": "D",
+            "text": "Bộ nhớ đệm Cache"
+          }
+        ],
+        "correctAnswer": "B",
+        "explanation": "Khối ALU (Arithmetic Logic Unit) là bộ phận chuyên trách tính toán số học (cộng, trừ...) và các phép toán logic (AND, OR, NOT) trong bộ xử lý trung tâm."
+      },
+      {
+        "id": "q_2",
+        "question": "Câu 2: Bộ nhớ RAM thuộc loại bộ nhớ nào sau đây?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Bộ nhớ bất biến (Non-volatile memory)"
+          },
+          {
+            "key": "B",
+            "text": "Bộ nhớ khả biến, mất dữ liệu khi mất nguồn điện (Volatile memory)"
+          },
+          {
+            "key": "C",
+            "text": "Bộ nhớ chỉ đọc (ROM)"
+          },
+          {
+            "key": "D",
+            "text": "Bộ nhớ lưu trữ vĩnh viễn"
+          }
+        ],
+        "correctAnswer": "B",
+        "explanation": "RAM là bộ nhớ khả biến (volatile), dữ liệu sẽ biến mất hoàn toàn ngay khi mất nguồn điện cung cấp."
+      },
+      {
+        "id": "q_3",
+        "question": "Câu 3: Bộ nhớ Cache được sinh ra nhằm mục đích chính nào?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Mở rộng dung lượng cho ổ cứng"
+          },
+          {
+            "key": "B",
+            "text": "Giảm bớt số lượng chân cắm của CPU"
+          },
+          {
+            "key": "C",
+            "text": "Thu hẹp khoảng cách chênh lệch tốc độ giữa CPU siêu nhanh và bộ nhớ RAM"
+          },
+          {
+            "key": "D",
+            "text": "Lưu trữ hệ điều hành vĩnh viễn"
+          }
+        ],
+        "correctAnswer": "C",
+        "explanation": "Tốc độ xử lý của CPU nhanh hơn nhiều lần tốc độ truy xuất RAM, Cache tốc độ cực cao đặt gần CPU giúp CPU không phải chờ dữ liệu từ RAM."
+      },
+      {
+        "id": "q_4",
+        "question": "Câu 4: Thanh ghi PC (Program Counter) trong CPU có chức năng gì?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Lưu trữ kết quả của phép toán vừa thực hiện"
+          },
+          {
+            "key": "B",
+            "text": "Đếm số lượng xung nhịp của CPU"
+          },
+          {
+            "key": "C",
+            "text": "Chứa địa chỉ của lệnh tiếp theo cần được nạp và thực thi"
+          },
+          {
+            "key": "D",
+            "text": "Điều khiển tốc độ quạt tản nhiệt"
+          }
+        ],
+        "correctAnswer": "C",
+        "explanation": "Program Counter (PC) lưu trữ địa chỉ bộ nhớ của chỉ thị/lệnh tiếp theo mà bộ vi xử lý chuẩn bị thực hiện."
+      },
+      {
+        "id": "q_5",
+        "question": "Câu 5: Nguyên lý kiến trúc máy tính Von Neumann có đặc điểm quan trọng nào sau đây?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Dữ liệu và chương trình được lưu trữ chung trong cùng một không gian bộ nhớ"
+          },
+          {
+            "key": "B",
+            "text": "Bộ nhớ chương trình và bộ nhớ dữ liệu hoàn toàn tách rời nhau"
+          },
+          {
+            "key": "C",
+            "text": "Không cần sử dụng bộ đếm chương trình PC"
+          },
+          {
+            "key": "D",
+            "text": "Tất cả các tác vụ đều được thực thi song song hoàn toàn"
+          }
+        ],
+        "correctAnswer": "A",
+        "explanation": "Kiến trúc Von Neumann nổi tiếng với nguyên lý \"Chương trình được lưu trữ\" (Stored-program concept), trong đó mã lệnh và dữ liệu chia sẻ chung không gian bộ nhớ."
+      }
+    ],
+    "createdAt": "2026-11-06T11:12:49.334Z"
+  }
+]

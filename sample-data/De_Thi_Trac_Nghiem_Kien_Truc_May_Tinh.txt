@@ -1,0 +1,41 @@
+ĐỀ THI TRẮC NGHIỆM ÔN TẬP: KIẾN TRÚC MÁY TÍNH VÀ HỆ ĐIỀU HÀNH
+
+Câu 1: Thành phần nào trong CPU chịu trách nhiệm thực hiện các phép tính số học và logic?
+A. Control Unit (CU)
+B. Arithmetic and Logic Unit (ALU)
+C. Thanh ghi Register
+D. Bộ nhớ đệm Cache
+Đáp án: B
+Lời giải: Khối ALU (Arithmetic Logic Unit) là bộ phận chuyên trách tính toán số học (cộng, trừ...) và các phép toán logic (AND, OR, NOT) trong bộ xử lý trung tâm.
+
+Câu 2: Bộ nhớ RAM thuộc loại bộ nhớ nào sau đây?
+A. Bộ nhớ bất biến (Non-volatile memory)
+B. Bộ nhớ khả biến, mất dữ liệu khi mất nguồn điện (Volatile memory)
+C. Bộ nhớ chỉ đọc (ROM)
+D. Bộ nhớ lưu trữ vĩnh viễn
+Đáp án: B
+Lời giải: RAM là bộ nhớ khả biến (volatile), dữ liệu sẽ biến mất hoàn toàn ngay khi mất nguồn điện cung cấp.
+
+Câu 3: Bộ nhớ Cache được sinh ra nhằm mục đích chính nào?
+A. Mở rộng dung lượng cho ổ cứng
+B. Giảm bớt số lượng chân cắm của CPU
+C. Thu hẹp khoảng cách chênh lệch tốc độ giữa CPU siêu nhanh và bộ nhớ RAM
+D. Lưu trữ hệ điều hành vĩnh viễn
+Đáp án: C
+Lời giải: Tốc độ xử lý của CPU nhanh hơn nhiều lần tốc độ truy xuất RAM, Cache tốc độ cực cao đặt gần CPU giúp CPU không phải chờ dữ liệu từ RAM.
+
+Câu 4: Thanh ghi PC (Program Counter) trong CPU có chức năng gì?
+A. Lưu trữ kết quả của phép toán vừa thực hiện
+B. Đếm số lượng xung nhịp của CPU
+C. Chứa địa chỉ của lệnh tiếp theo cần được nạp và thực thi
+D. Điều khiển tốc độ quạt tản nhiệt
+Đáp án: C
+Lời giải: Program Counter (PC) lưu trữ địa chỉ bộ nhớ của chỉ thị/lệnh tiếp theo mà bộ vi xử lý chuẩn bị thực hiện.
+
+Câu 5: Nguyên lý kiến trúc máy tính Von Neumann có đặc điểm quan trọng nào sau đây?
+A. Dữ liệu và chương trình được lưu trữ chung trong cùng một không gian bộ nhớ
+B. Bộ nhớ chương trình và bộ nhớ dữ liệu hoàn toàn tách rời nhau
+C. Không cần sử dụng bộ đếm chương trình PC
+D. Tất cả các tác vụ đều được thực thi song song hoàn toàn
+Đáp án: A
+Lời giải: Kiến trúc Von Neumann nổi tiếng với nguyên lý "Chương trình được lưu trữ" (Stored-program concept), trong đó mã lệnh và dữ liệu chia sẻ chung không gian bộ nhớ.

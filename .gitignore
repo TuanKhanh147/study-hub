@@ -1,0 +1,12 @@
+node_modules/
+.env
+uploads/*
+!uploads/.gitkeep
+data/*
+!data/users.json
+!data/quizzes.json
+!data/results.json
+!data/files.json
+!data/.gitkeep
+.DS_Store
+Thumbs.db

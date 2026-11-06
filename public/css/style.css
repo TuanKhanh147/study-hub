@@ -1,0 +1,117 @@
+/* Custom App Styles */
+.tab-btn.active {
+  background-color: white;
+  color: #4f46e5;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+
+.tab-btn:not(.active) {
+  color: #64748b;
+}
+
+.tab-btn:not(.active):hover {
+  color: #1e293b;
+}
+
+/* Flashcard Flip 3D effect */
+.flashcard {
+  perspective: 1000px;
+  cursor: pointer;
+  min-height: 160px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.flashcard-front {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.flashcard-back {
+  background: linear-gradient(135deg, #eef2ff 0%, #ede9fe 100%);
+  border: 1px solid #c7d2fe;
+  transform: rotateY(180deg);
+}
+
+/* Question Option Selection */
+.quiz-option-item {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.quiz-option-item:hover {
+  border-color: #818cf8;
+  background-color: #f5f3ff;
+}
+
+.quiz-option-item.selected {
+  border-color: #6366f1;
+  background-color: #eef2ff;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Question Palette Buttons */
+.palette-btn {
+  transition: all 0.15s ease-in-out;
+}
+
+.palette-btn.active {
+  background-color: #4f46e5 !important;
+  color: white !important;
+  font-weight: 700;
+  transform: scale(1.05);
+}
+
+.palette-btn.answered {
+  background-color: #ecfdf5;
+  border-color: #34d399;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.palette-btn.flagged {
+  border-color: #f59e0b !important;
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+}
+
+/* Smooth Transitions */
+.tab-pane {
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

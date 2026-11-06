@@ -1,0 +1,16 @@
+[
+  {
+    "id": "res_1793963569348",
+    "userId": "user_demo",
+    "quizId": "quiz_1793963569333",
+    "quizTitle": "Đề thi Kiến trúc máy tính",
+    "score": 10,
+    "correctCount": 5,
+    "totalQuestions": 5,
+    "percentage": 100,
+    "gradeRanking": "Xuất sắc",
+    "evaluationBadge": "Nắm vững kiến thức chuyên sâu",
+    "timeSpentSeconds": 145,
+    "completedAt": "2026-11-06T11:12:49.348Z"
+  }
+]

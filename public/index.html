@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartEdu - Nền Tảng Học Tập, Lưu Trữ & Ôn Thi Trắc Nghiệm Thông Minh</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- ==================== TOP NAVIGATION ==================== -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Brand -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">SmartEdu</span>
+          <span class="hidden sm:inline-block text-xs font-semibold px-2 py-0.5 ml-2 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200/50">Trợ Lý Học Tập AI</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Desktop) -->
+      <nav id="nav-tabs" class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button onclick="switchTab('dashboard')" class="tab-btn active px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5" data-tab="dashboard">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Tổng quan
+        </button>
+        <button onclick="switchTab('storage')" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5" data-tab="storage">
+          <i data-lucide="folder-archive" class="w-4 h-4"></i> Kho lưu trữ
+        </button>
+        <button onclick="switchTab('analyzer')" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5" data-tab="analyzer">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Phân tích trọng tâm
+        </button>
+        <button onclick="switchTab('quiz')" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5" data-tab="quiz">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i> Thi trắc nghiệm
+        </button>
+        <button onclick="switchTab('history')" class="tab-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5" data-tab="history">
+          <i data-lucide="trophy" class="w-4 h-4"></i> Kết quả ôn tập
+        </button>
+      </nav>
+
+      <!-- User Profile / Auth Action -->
+      <div class="flex items-center gap-3">
+        <!-- Storage Pill Badge -->
+        <div id="storage-pill" class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium cursor-pointer" onclick="switchTab('storage')" title="Dung lượng an toàn, tránh đầy ổ C">
+          <i data-lucide="hard-drive" class="w-4 h-4 text-emerald-600"></i>
+          <span id="storage-pill-text">0 MB / 10 GB (Tiết kiệm ổ C)</span>
+        </div>
+
+        <!-- Auth State: Guest -->
+        <div id="auth-guest" class="flex items-center gap-2">
+          <button onclick="openAuthModal('login')" class="px-4 py-2 text-sm font-medium text-slate-700 hover:text-indigo-600 transition">Đăng nhập</button>
+          <button onclick="openAuthModal('register')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition">Đăng ký</button>
+        </div>
+
+        <!-- Auth State: Logged In -->
+        <div id="auth-user" class="hidden items-center gap-3">
+          <div class="flex items-center gap-2 text-right">
+            <div>
+              <div id="user-display-name" class="text-sm font-semibold text-slate-800 leading-tight">Sinh viên</div>
+              <div id="user-display-id" class="text-xs text-slate-500">MSSV: SV2026</div>
+            </div>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 text-white font-bold flex items-center justify-center text-sm shadow">
+              <span id="user-avatar-initial">S</span>
+            </div>
+          </div>
+          <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Đăng xuất">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ========== TAB 1: DASHBOARD ========== -->
+    <section id="tab-dashboard" class="tab-pane active space-y-6">
+      
+      <!-- Welcome Banner -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-800 text-white p-6 sm:p-8 shadow-xl shadow-indigo-600/15">
+        <div class="relative z-10 max-w-3xl space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur text-xs font-semibold tracking-wide uppercase text-indigo-100 border border-white/20">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Không lo đầy ổ C máy tính
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Chào mừng bạn đến với SmartEdu Hub!</h1>
+          <p class="text-indigo-100 text-sm sm:text-base leading-relaxed">
+            Nền tảng lưu trữ bài tập trên hệ thống máy chủ an toàn, tự động đọc - trích xuất kiến thức trọng tâm bài học và biến tài liệu ôn tập thành đề thi trắc nghiệm kèm chấm điểm tự động.
+          </p>
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button onclick="switchTab('storage')" class="px-5 py-2.5 bg-white text-indigo-700 hover:bg-indigo-50 font-semibold text-sm rounded-xl shadow transition flex items-center gap-2">
+              <i data-lucide="upload-cloud" class="w-4 h-4"></i> Tải bài tập lên kho
+            </button>
+            <button onclick="switchTab('analyzer')" class="px-5 py-2.5 bg-indigo-500/30 hover:bg-indigo-500/40 text-white font-medium text-sm rounded-xl backdrop-blur border border-white/20 transition flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> Phân tích trọng tâm ôn tập
+            </button>
+            <button onclick="switchTab('quiz')" class="px-5 py-2.5 bg-violet-500/40 hover:bg-violet-500/50 text-white font-medium text-sm rounded-xl backdrop-blur border border-white/20 transition flex items-center gap-2">
+              <i data-lucide="play-circle" class="w-4 h-4"></i> Thi trắc nghiệm ngay
+            </button>
+          </div>
+        </div>
+        <!-- Decorative Background Blob -->
+        <div class="absolute -right-10 -bottom-10 w-80 h-80 rounded-full bg-violet-500/20 blur-3xl pointer-events-none"></div>
+      </div>
+
+      <!-- Quick Stats Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Stat 1: Storage Saved -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="hard-drive" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tiết kiệm ổ C</div>
+            <div id="stat-storage-used" class="text-xl font-bold text-slate-800">0.0 MB</div>
+            <div class="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-0.5">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i> Đã bảo vệ ổ đĩa
+            </div>
+          </div>
+        </div>
+
+        <!-- Stat 2: Total Files -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="file-text" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Tài liệu lưu trữ</div>
+            <div id="stat-total-files" class="text-xl font-bold text-slate-800">0 file</div>
+            <div class="text-xs text-slate-500 mt-0.5">Bài tập, PDF, Slide</div>
+          </div>
+        </div>
+
+        <!-- Stat 3: Quizzes Taken -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="check-square" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Lượt làm đề thi</div>
+            <div id="stat-quizzes-taken" class="text-xl font-bold text-slate-800">0 lượt</div>
+            <div class="text-xs text-slate-500 mt-0.5">Trắc nghiệm tự động</div>
+          </div>
+        </div>
+
+        <!-- Stat 4: Average Score -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Điểm trung bình</div>
+            <div id="stat-avg-score" class="text-xl font-bold text-slate-800">-- / 10</div>
+            <div id="stat-avg-badge" class="text-xs text-amber-600 font-medium mt-0.5">Sẵn sàng ôn tập</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature Highlight Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition group">
+          <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+            <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800 mb-2">1. Lưu Trữ Thông Minh Không Lo Đầy Ổ</h3>
+          <p class="text-slate-600 text-sm leading-relaxed mb-4">
+            Lưu trữ không giới hạn các file tài liệu, bài tập nặng, giáo trình, slide môn học trên kho lưu trữ tập trung. Sinh viên có thể truy cập mọi lúc trên điện thoại hoặc máy tính mà không chiếm dung lượng ổ C.
+          </p>
+          <a onclick="switchTab('storage')" class="text-indigo-600 hover:text-indigo-700 font-semibold text-sm inline-flex items-center gap-1 cursor-pointer">
+            Mở kho tài liệu <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition group">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+            <i data-lucide="brain-circuit" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800 mb-2">2. Đọc & Trích Xuất Trọng Tâm Ôn Tập</h3>
+          <p class="text-slate-600 text-sm leading-relaxed mb-4">
+            Hệ thống AI tự động phân tích giáo trình và slide dài hàng chục trang: trích xuất các định nghĩa cốt lõi, công thức then chốt, câu hỏi phản xạ và lộ trình ôn thi ngắn hạn giúp tiết kiệm 70% thời gian.
+          </p>
+          <a onclick="switchTab('analyzer')" class="text-purple-600 hover:text-purple-700 font-semibold text-sm inline-flex items-center gap-1 cursor-pointer">
+            Phân tích tài liệu ngay <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition group">
+          <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition">
+            <i data-lucide="check-check" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800 mb-2">3. Thi Trắc Nghiệm & Chấm Điểm Tự Động</h3>
+          <p class="text-slate-600 text-sm leading-relaxed mb-4">
+            Chỉ cần tải file đề hoặc tài liệu ôn tập lên, hệ thống sẽ dựng phòng thi trực tuyến với đồng hồ đếm giờ. Sau khi nộp bài, điểm số được tính tức thì kèm giải thích chi tiết vì sao đúng/sai.
+          </p>
+          <a onclick="switchTab('quiz')" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm inline-flex items-center gap-1 cursor-pointer">
+            Bắt đầu làm bài thi <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Recent Files & Quizzes -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i> Tài liệu vừa tải lên
+            </h3>
+            <button onclick="switchTab('storage')" class="text-xs text-indigo-600 hover:underline">Xem tất cả</button>
+          </div>
+          <div id="dashboard-recent-files" class="space-y-2 text-sm text-slate-500">
+            Chưa có tài liệu nào. Hãy tải file đầu tiên lên kho lưu trữ!
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="award" class="w-4 h-4 text-slate-400"></i> Bài thi gần nhất
+            </h3>
+            <button onclick="switchTab('history')" class="text-xs text-indigo-600 hover:underline">Xem lịch sử</button>
+          </div>
+          <div id="dashboard-recent-quizzes" class="space-y-2 text-sm text-slate-500">
+            Chưa có bài thi nào được hoàn thành.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TAB 2: KHO LƯU TRỮ TÀI LIỆU ========== -->
+    <section id="tab-storage" class="tab-pane hidden space-y-6">
+      
+      <!-- Storage Header & Quota Bar -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="folder-archive" class="w-6 h-6 text-indigo-600"></i> Kho Lưu Trữ Bài Tập & Tài Liệu Học Tập
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">
+              Lưu trữ tập trung giúp bảo vệ ổ C máy tính khỏi tình trạng đầy bộ nhớ khi tải nhiều tài liệu bài học.
+            </p>
+          </div>
+          <!-- Storage Meter Box -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 w-full sm:w-72">
+            <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
+              <span>Dung lượng đã dùng:</span>
+              <span id="storage-text-detail">0.0 MB / 10 GB</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+              <div id="storage-progress-bar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0.5%"></div>
+            </div>
+            <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center justify-between">
+              <span>Đang hoạt động tốt</span>
+              <span id="storage-percent-label">0.0%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Form Area -->
+        <div class="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50/50 rounded-2xl p-6 transition text-center cursor-pointer relative" id="drop-zone">
+          <input type="file" id="file-upload-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.docx,.txt,.md,.json,.csv">
+          <div class="space-y-3 pointer-events-none">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto">
+              <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <span class="text-sm font-bold text-indigo-600 hover:underline">Nhấp để chọn file</span> hoặc kéo thả tài liệu vào đây
+              <div class="text-xs text-slate-400 mt-1">Hỗ trợ PDF, Word (.docx), Ghi chú (.txt, .md), Đề thi (.json, .csv) - Tối đa 100MB/file</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload Extra Settings Modal/Bar -->
+        <div id="upload-meta-bar" class="hidden bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center gap-3">
+          <div class="text-sm font-semibold text-slate-700" id="selected-file-name">Tên file</div>
+          <select id="upload-tag" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500">
+            <option value="Bài tập về nhà">Bài tập về nhà</option>
+            <option value="Tài liệu lý thuyết">Tài liệu lý thuyết</option>
+            <option value="Đề trắc nghiệm ôn thi">Đề trắc nghiệm ôn thi</option>
+            <option value="Slide bài giảng">Slide bài giảng</option>
+          </select>
+          <input type="text" id="upload-subject" placeholder="Tên môn học (VD: Toán, Triết, Lập trình...)" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-indigo-500 flex-1 min-w-[150px]">
+          <button id="btn-submit-upload" onclick="submitUpload()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow transition flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4"></i> Xác nhận tải lên
+          </button>
+          <button onclick="cancelUploadSelection()" class="px-3 py-1.5 text-slate-600 hover:bg-slate-200 rounded-lg text-xs">Hủy</button>
+        </div>
+      </div>
+
+      <!-- File List & Filters -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-slate-800">Danh Sách Tài Liệu Trong Kho</h3>
+            <span id="file-count-badge" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">0 file</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              <input type="text" id="search-files-input" oninput="filterFiles()" placeholder="Tìm kiếm tài liệu..." class="text-xs pl-9 pr-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 w-48 sm:w-64">
+            </div>
+            <select id="filter-tag-select" onchange="filterFiles()" class="text-xs border border-slate-200 rounded-xl px-3 py-2 bg-white">
+              <option value="all">Tất cả danh mục</option>
+              <option value="Bài tập về nhà">Bài tập về nhà</option>
+              <option value="Tài liệu lý thuyết">Tài liệu lý thuyết</option>
+              <option value="Đề trắc nghiệm ôn thi">Đề trắc nghiệm ôn thi</option>
+              <option value="Slide bài giảng">Slide bài giảng</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Files Container -->
+        <div id="files-table-container" class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Tài liệu</th>
+                <th class="py-3 px-3">Phân loại & Môn</th>
+                <th class="py-3 px-3">Kích thước</th>
+                <th class="py-3 px-3">Ngày lưu</th>
+                <th class="py-3 px-4 text-right">Thao tác nhanh</th>
+              </tr>
+            </thead>
+            <tbody id="files-tbody" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="5" class="py-8 text-center text-slate-400">
+                  <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+                  Kho lưu trữ trống. Hãy tải tài liệu đầu tiên lên!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TAB 3: TRỢ LÝ ĐỌC & PHÂN TÍCH TRỌNG TÂM ========== -->
+    <section id="tab-analyzer" class="tab-pane hidden space-y-6">
+      
+      <!-- Header -->
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Trợ Lý Đọc & Phân Tích Trọng Tâm Ôn Tập</h2>
+            <p class="text-slate-500 text-sm">
+              Hệ thống tự động đọc tài liệu, rút gọn lý thuyết dài dòng thành các khái niệm cốt lõi, công thức và flashcard ôn thi cấp tốc.
+            </p>
+          </div>
+        </div>
+
+        <!-- Select Document or Direct Text -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Choose from uploaded file -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+            <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider">Cách 1: Chọn tài liệu trong kho lưu trữ</label>
+            <select id="analyzer-file-select" class="w-full text-sm bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-purple-500">
+              <option value="">-- Chọn tài liệu đã lưu --</option>
+            </select>
+            <p class="text-xs text-slate-400">Hỗ trợ đọc sâu các file PDF, Word (.docx), file văn bản .txt/.md</p>
+          </div>
+
+          <!-- Or paste text directly -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+            <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider">Cách 2: Hoặc dán nội dung văn bản / ghi chú</label>
+            <textarea id="analyzer-custom-text" rows="3" placeholder="Dán nội dung bài học, chương sách, hoặc ghi chú cần phân tích tại đây..." class="w-full text-sm bg-white border border-slate-200 rounded-xl p-3 focus:ring-2 focus:ring-purple-500"></textarea>
+          </div>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between">
+          <div class="text-xs text-slate-500 flex items-center gap-1.5">
+            <i data-lucide="info" class="w-4 h-4 text-indigo-500"></i>
+            Tự động kích hoạt AI phân tích sâu khi có Gemini API Key hoặc chạy NLP thông minh có sẵn.
+          </div>
+          <button id="btn-run-analysis" onclick="runDocumentAnalysis()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-purple-500/25 transition flex items-center gap-2">
+            <i data-lucide="cpu" class="w-4 h-4"></i> Bắt đầu phân tích trọng tâm
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="analyzer-loading" class="hidden bg-white p-12 rounded-2xl border border-slate-200 text-center space-y-4">
+        <div class="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+        <div class="text-base font-bold text-slate-800">Đang đọc và phân tích cấu trúc tài liệu...</div>
+        <div class="text-xs text-slate-400 max-w-md mx-auto">Hệ thống đang trích xuất các khái niệm chính, công thức cốt lõi và tổng hợp flashcard ôn tập cho bạn.</div>
+      </div>
+
+      <!-- Analysis Results Container -->
+      <div id="analyzer-result" class="hidden space-y-6">
+        
+        <!-- Header & Action Bar -->
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="file-check" class="w-5 h-5 text-emerald-600"></i>
+            Kết Quả Phân Tích Trọng Tâm: <span id="analyzer-result-filename" class="text-purple-600">Tài liệu</span>
+          </h3>
+          <div class="flex items-center gap-2">
+            <button onclick="createQuizFromCurrentAnalysis()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-1.5">
+              <i data-lucide="play" class="w-4 h-4"></i> Làm đề trắc nghiệm từ nội dung này
+            </button>
+          </div>
+        </div>
+
+        <!-- 1. Overview Summary Box -->
+        <div class="bg-gradient-to-br from-indigo-50/80 to-purple-50/80 border border-indigo-100 p-6 rounded-2xl">
+          <div class="text-xs font-bold uppercase text-indigo-700 tracking-wider mb-2 flex items-center gap-1.5">
+            <i data-lucide="bookmark" class="w-4 h-4"></i> 1. Tóm Tắt Khái Quát Nội Dung
+          </div>
+          <p id="result-overview" class="text-slate-700 text-sm leading-relaxed font-normal">
+            Nội dung tóm tắt...
+          </p>
+        </div>
+
+        <!-- 2. Core Concepts Grid -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-xs font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+              <i data-lucide="key" class="w-4 h-4 text-purple-600"></i> 2. Các Khái Niệm & Trọng Tâm Cần Nắm
+            </div>
+            <span class="text-xs text-slate-400">Được rút gọn từ toàn bộ tài liệu</span>
+          </div>
+          <div id="result-concepts-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Concepts Cards injected by JS -->
+          </div>
+        </div>
+
+        <!-- 3. Key Formulas & Rules -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+          <div class="text-xs font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+            <i data-lucide="binary" class="w-4 h-4 text-blue-600"></i> 3. Công Thức & Quy Tắc Ghi Nhớ Nhanh
+          </div>
+          <div id="result-formulas-list" class="space-y-2">
+            <!-- Formula items injected by JS -->
+          </div>
+        </div>
+
+        <!-- 4. Interactive Flashcards (Self-study) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-xs font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-4 h-4 text-amber-600"></i> 4. Flashcards Tự Ôn Luyện (Bấm để xem đáp án)
+            </div>
+            <span class="text-xs text-slate-400">Giúp tăng khả năng phản xạ khi đi thi</span>
+          </div>
+          <div id="result-flashcards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Flashcards injected by JS -->
+          </div>
+        </div>
+
+        <!-- 5. Rapid Revision Roadmap -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+          <div class="text-xs font-bold uppercase text-slate-500 tracking-wider flex items-center gap-1.5">
+            <i data-lucide="milestone" class="w-4 h-4 text-indigo-600"></i> 5. Lộ Trình Ôn Thi Cấp Tốc Đề Xuất
+          </div>
+          <div id="result-roadmap" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Roadmap injected by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== TAB 4: THI TRẮC NGHIỆM & CHẤM ĐIỂM ========== -->
+    <section id="tab-quiz" class="tab-pane hidden space-y-6">
+      
+      <!-- View 1: Quiz Launcher (Chọn tài liệu hoặc tạo đề) -->
+      <div id="quiz-launcher" class="space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold text-slate-800">Phòng Thi Trắc Nghiệm & Chấm Điểm Tự Động</h2>
+              <p class="text-slate-500 text-sm">
+                Tải file đề trắc nghiệm lên hoặc để hệ thống tự động sinh câu hỏi từ tài liệu học tập của bạn.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <!-- Option 1: Pick from stored document -->
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-4">
+              <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <i data-lucide="folder" class="w-4 h-4 text-indigo-600"></i> Lựa chọn 1: Sử dụng tài liệu có sẵn trong kho
+              </div>
+              <select id="quiz-file-select" class="w-full text-sm bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-emerald-500">
+                <option value="">-- Chọn file đề trắc nghiệm hoặc bài học --</option>
+              </select>
+              <p class="text-xs text-slate-400">
+                Hệ thống tự động phát hiện câu hỏi dạng trắc nghiệm (Câu 1: ... A. ... B. ... C. ... D. ...) hoặc tự động sinh câu hỏi trắc nghiệm nếu file là tài liệu lý thuyết!
+              </p>
+              <button onclick="startQuizFromStorage()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-sm transition shadow flex items-center justify-center gap-2">
+                <i data-lucide="play" class="w-4 h-4"></i> Tạo đề & Bắt đầu làm bài
+              </button>
+            </div>
+
+            <!-- Option 2: Upload new test file directly -->
+            <div class="p-5 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-4">
+              <div class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <i data-lucide="upload" class="w-4 h-4 text-emerald-600"></i> Lựa chọn 2: Tải ngay file trắc nghiệm mới
+              </div>
+              <div class="border-2 border-dashed border-emerald-300 bg-emerald-50/40 rounded-xl p-4 text-center cursor-pointer relative hover:bg-emerald-50/70 transition">
+                <input type="file" id="quiz-direct-file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.docx,.txt,.json">
+                <div class="text-xs font-semibold text-emerald-700" id="quiz-direct-file-label">
+                  <i data-lucide="file-up" class="w-6 h-6 mx-auto mb-1 text-emerald-600"></i>
+                  Chọn file đề thi PDF, Word hoặc TXT
+                </div>
+              </div>
+              <button onclick="startQuizFromDirectUpload()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-sm transition shadow flex items-center justify-center gap-2">
+                <i data-lucide="zap" class="w-4 h-4"></i> Tải lên, Trích xuất & Vào thi
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Format Guide Accordion -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-2">
+          <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <i data-lucide="help-circle" class="w-4 h-4 text-blue-500"></i> Các định dạng file đề thi được hỗ trợ:
+          </div>
+          <p>
+            • <strong>Đề thi có sẵn đáp án:</strong> File chứa các câu như: <code class="bg-slate-100 px-1 py-0.5 rounded text-indigo-600">Câu 1: ... A. ... B. ... C. ... D. ... Đáp án: A</code>
+          </p>
+          <p>
+            • <strong>Tài liệu lý thuyết / Đề chưa có đáp án:</strong> Hệ thống tự động phân tích và tạo bộ 10 câu hỏi trắc nghiệm đánh giá kiến thức trọng tâm!
+          </p>
+        </div>
+      </div>
+
+      <!-- View 2: Live Exam Room (Màn hình làm bài thi trực tuyến) -->
+      <div id="quiz-exam-room" class="hidden space-y-6">
+        
+        <!-- Top Exam Header: Title, Timer, Submit Button -->
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-md sticky top-20 z-30 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 id="exam-quiz-title" class="font-bold text-slate-800 text-base sm:text-lg">Đề ôn tập trắc nghiệm</h3>
+            <div class="text-xs text-slate-500 flex items-center gap-3 mt-0.5">
+              <span>Tổng số: <strong id="exam-total-questions-count">0</strong> câu hỏi</span>
+              <span>•</span>
+              <span id="exam-answered-status" class="text-indigo-600 font-medium">Đã làm 0/0 câu</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <!-- Countdown Timer -->
+            <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-mono font-bold text-sm">
+              <i data-lucide="timer" class="w-4 h-4 animate-pulse"></i>
+              <span id="exam-timer-display">15:00</span>
+            </div>
+
+            <!-- Submit Button -->
+            <button onclick="confirmSubmitQuiz()" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5">
+              <i data-lucide="send" class="w-4 h-4"></i> Nộp bài thi
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Exam Workspace: Question Area & Navigation Palette -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- Question Box (Cols 1-3) -->
+          <div class="lg:col-span-3 space-y-4">
+            <div class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200/80 shadow-sm space-y-6" id="current-question-card">
+              <!-- Question Header -->
+              <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider" id="current-question-badge">
+                  Câu hỏi 1 / 10
+                </span>
+                <button onclick="toggleFlagCurrentQuestion()" id="btn-flag-question" class="text-xs text-slate-400 hover:text-amber-500 flex items-center gap-1">
+                  <i data-lucide="flag" class="w-4 h-4"></i> Đặt cờ nghi vấn
+                </button>
+              </div>
+
+              <!-- Question Content Text -->
+              <div id="current-question-text" class="text-slate-800 font-semibold text-base sm:text-lg leading-relaxed">
+                Nội dung câu hỏi...
+              </div>
+
+              <!-- 4 Options A, B, C, D -->
+              <div id="current-question-options" class="space-y-3">
+                <!-- Option items injected by JS -->
+              </div>
+
+              <!-- Navigation Prev / Next Buttons -->
+              <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button id="btn-prev-question" onclick="navigateQuestion(-1)" class="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                  <i data-lucide="arrow-left" class="w-4 h-4"></i> Câu trước
+                </button>
+                <button id="btn-next-question" onclick="navigateQuestion(1)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-1.5">
+                  Câu tiếp theo <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question Palette / Grid (Col 4) -->
+          <div class="lg:col-span-1">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm sticky top-40 space-y-4">
+              <h4 class="font-bold text-slate-800 text-sm">Danh sách câu hỏi</h4>
+              
+              <!-- Palette grid buttons -->
+              <div id="exam-palette-grid" class="grid grid-cols-5 gap-2">
+                <!-- 1, 2, 3... buttons injected by JS -->
+              </div>
+
+              <!-- Legend -->
+              <div class="pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-500">
+                <div class="flex items-center gap-2">
+                  <span class="w-3.5 h-3.5 rounded bg-indigo-600 inline-block"></span>
+                  <span>Đang chọn</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3.5 h-3.5 rounded bg-emerald-100 border border-emerald-400 inline-block"></span>
+                  <span>Đã trả lời</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3.5 h-3.5 rounded bg-slate-100 border border-slate-300 inline-block"></span>
+                  <span>Chưa trả lời</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="w-3.5 h-3.5 rounded bg-amber-100 border border-amber-400 inline-block"></span>
+                  <span>Có cờ nghi vấn</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- View 3: Grading & Detailed Results (Kết quả chấm điểm chi tiết) -->
+      <div id="quiz-result-view" class="hidden space-y-6">
+        
+        <!-- Score Card Banner -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xl overflow-hidden relative">
+          <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            <div class="text-center md:text-left space-y-2">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider border border-emerald-200">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Chấm điểm hoàn tất
+              </div>
+              <h2 id="result-quiz-title" class="text-2xl font-extrabold text-slate-800">Kết Quả Bài Thi</h2>
+              <p id="result-evaluation-badge" class="text-slate-600 text-sm">Nhận xét đánh giá năng lực...</p>
+              
+              <div class="flex flex-wrap gap-4 pt-2 text-xs font-medium text-slate-600 justify-center md:justify-start">
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                  <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Đúng: <strong id="result-correct-count" class="text-emerald-700 ml-1">0/0</strong>
+                </span>
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                  <i data-lucide="clock" class="w-4 h-4 text-indigo-600"></i> Thời gian: <strong id="result-time-spent" class="text-indigo-700 ml-1">0 giây</strong>
+                </span>
+                <span class="bg-slate-100 px-3 py-1.5 rounded-lg flex items-center gap-1">
+                  <i data-lucide="pie-chart" class="w-4 h-4 text-purple-600"></i> Tỷ lệ: <strong id="result-percentage" class="text-purple-700 ml-1">0%</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Big Grade Circle -->
+            <div class="flex flex-col items-center">
+              <div class="w-32 h-32 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex flex-col items-center justify-center shadow-lg shadow-indigo-500/30">
+                <span id="result-score-display" class="text-4xl font-extrabold tracking-tight">0.0</span>
+                <span class="text-xs uppercase tracking-wider font-semibold opacity-90">Thang điểm 10</span>
+              </div>
+              <span id="result-grade-ranking" class="mt-2 text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">
+                Xếp loại: Xuất sắc
+              </span>
+            </div>
+
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-6 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <button onclick="retakeCurrentQuiz()" class="px-5 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold text-xs rounded-xl transition flex items-center gap-1.5">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Làm lại đề thi này
+            </button>
+            <button onclick="backToQuizLauncher()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow transition flex items-center gap-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Chọn đề khác hoặc tạo đề mới
+            </button>
+          </div>
+        </div>
+
+        <!-- Detailed Review of All Questions -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+              <i data-lucide="list-checks" class="w-5 h-5 text-indigo-600"></i>
+              Bảng Phân Tích Lời Giải & Chi Tiết Từng Câu Hỏi
+            </h3>
+            <span class="text-xs text-slate-500">Đối chiếu câu trả lời và lời giải</span>
+          </div>
+
+          <div id="result-detailed-questions-container" class="space-y-6">
+            <!-- Review items injected by JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========== TAB 5: LỊCH SỬ HỌC TẬP & KẾT QUẢ ========== -->
+    <section id="tab-history" class="tab-pane hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="trophy" class="w-6 h-6 text-amber-500"></i> Lịch Sử Làm Bài & Tiến Độ Ôn Tập
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">
+              Theo dõi sự tiến bộ qua từng bài thi trắc nghiệm và ôn luyện lại các câu sai.
+            </p>
+          </div>
+          <button onclick="loadQuizHistory()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Làm mới
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-400 text-xs uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Tên bài thi / Đề ôn</th>
+                <th class="py-3 px-3">Điểm số</th>
+                <th class="py-3 px-3">Số câu đúng</th>
+                <th class="py-3 px-3">Xếp loại</th>
+                <th class="py-3 px-3">Thời gian</th>
+                <th class="py-3 px-4">Ngày hoàn thành</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody" class="divide-y divide-slate-100">
+              <tr>
+                <td colspan="6" class="py-8 text-center text-slate-400">
+                  Chưa có lịch sử làm bài thi.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2 font-medium">
+        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+        SmartEdu - Bảo vệ ổ C máy tính, học tập & ôn thi trắc nghiệm thông minh.
+      </div>
+      <div>
+        Sử dụng công nghệ AI & Node.js • Phát triển cho Sinh viên Việt Nam
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================== AUTH MODAL (LOGIN / REGISTER) ==================== -->
+  <div id="auth-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative">
+      <button onclick="closeAuthModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Auth Switcher -->
+      <div class="flex items-center justify-center gap-2 bg-slate-100 p-1 rounded-xl mb-6">
+        <button id="auth-switch-login" onclick="setAuthMode('login')" class="flex-1 py-2 text-xs font-bold rounded-lg transition bg-white text-indigo-600 shadow-sm">
+          Đăng nhập
+        </button>
+        <button id="auth-switch-register" onclick="setAuthMode('register')" class="flex-1 py-2 text-xs font-bold rounded-lg transition text-slate-500 hover:text-slate-700">
+          Đăng ký tài khoản
+        </button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Email sinh viên</label>
+          <input type="email" id="login-email" required placeholder="sinhvien@hust.edu.vn" value="sinhvien@hust.edu.vn" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
+          <input type="password" id="login-password" required placeholder="••••••" value="123456" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="text-xs text-indigo-600 bg-indigo-50 p-2.5 rounded-xl border border-indigo-100">
+          💡 <strong>Tài khoản mẫu có sẵn:</strong> sinhvien@hust.edu.vn / Mật khẩu: 123456
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md shadow-indigo-600/25 transition">
+          Đăng nhập ngay
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên</label>
+          <input type="text" id="reg-name" required placeholder="Nguyễn Văn A" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mã số sinh viên (MSSV)</label>
+          <input type="text" id="reg-student-id" placeholder="SV20261234" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Email trường hoặc cá nhân</label>
+          <input type="email" id="reg-email" required placeholder="sv@university.edu.vn" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
+          <input type="password" id="reg-password" required placeholder="Tối thiểu 6 ký tự" class="w-full text-sm border border-slate-200 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md shadow-indigo-600/25 transition">
+          Tạo tài khoản học tập
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden max-w-sm bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 transition-all">
+    <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">Thông báo thành công</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/files.js"></script>
+  <script src="js/analyzer.js"></script>
+  <script src="js/quiz.js"></script>
+  <script>
+    // Initialize Lucide icons on load
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

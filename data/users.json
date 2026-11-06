@@ -1,0 +1,13 @@
+[
+  {
+    "id": "user_demo",
+    "name": "Sinh Viên Mẫu",
+    "email": "sinhvien@hust.edu.vn",
+    "studentId": "SV20268888",
+    "passwordHash": "1af7bfcf8b2d5835818aa68bd3d772191dad041219e0fccb23c86972205a5f88",
+    "salt": "b4872eb8275fb056",
+    "createdAt": "2026-11-06T11:07:09.453Z",
+    "storageQuotaBytes": 10737418240,
+    "geminiApiKey": ""
+  }
+]
